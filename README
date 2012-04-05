@@ -1,0 +1,14 @@
+This is a simple RPG game I created in C++ using the Allegro game library v.4.4 (allegro.cc) as a final project for my CSE 240 Intro to Programming Languages class at ASU. The game could use some tweaking, but I am proud of the overall outcome, this being my first real attempt at making a game.
+
+
+Controls:
+W - Up
+S - Down
+A - Left
+D - Right
+Space - Attack
+Escape - Quit
+
+
+Instructions:
+Move around the map, collecting the pieces of armor to increase your defense and the weapons to increase your strength. Your strength determines the amount of damage you will do in combat, and a higher defence will reduce the damage taken in combat. Attack close enemies using the space bar, but watch your health. If it reaches 0, you lose all of your collected items, and move back to the starting area. Press the escape key to exit the game.
