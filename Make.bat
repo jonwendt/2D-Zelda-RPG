@@ -1,0 +1,1 @@
+g++ -g -w main.cpp main.h Object.cpp Object.h Enemy.cpp Enemy.h -lalleg -o Game.exe
