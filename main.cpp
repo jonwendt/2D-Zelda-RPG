@@ -2,7 +2,11 @@
 #include "Object.h"
 #include "Enemy.h"
 
-//draws the maphighlight over the correct coordinates of the minimap using mapx and mapy
+//Constants
+
+
+//Draws the maphighlight over the correct coordinates of the minimap using mapx and mapy.
+//Also changes the current item on the map. 2 of the areas don't have items.
 void drawMiniMap() {
   draw_sprite(screen, minimap, 640, 0);
   switch (mapx) {
@@ -57,7 +61,7 @@ void drawMiniMap() {
   }
 }
 
-//paints the notificationsBox and messages to the screen. Jury rigged type of textbox without scrolling.
+//Paints the notificationsBox and messages to the screen. Jury rigged type of textbox without scrolling.
 void drawNotifications(string m1) {
   draw_sprite(screen, notificationsBox, 0, 480);
   messageNew = m1;
@@ -72,7 +76,7 @@ void drawNotifications(string m1) {
   textout_ex(screen, Calibri16, message1.c_str(), 20, 610, makecol(0,0,0), -1);
 }
 
-//paints the player's health, strength, and defense to the screen
+//Paints the player's health, strength, and defense to the screen
 void drawStats() {
   draw_sprite(screen, statsBox, 640, 200);
   stringstream tempSS;
@@ -99,7 +103,8 @@ void drawStats() {
   textout_right_ex(screen, Impact20, tempS.c_str(), 835, 330, makecol(0,0,0), -1);
 }
 
-//draws the player's objects by looping through the playersObjects vector, addding its value to strength or defense depending on the object's "type" (WEAPON or ARMOR).
+//Draws the player's objects by looping through the playersObjects vector, addding its value to strength or
+//defense depending on the object's "type" (WEAPON or ARMOR).
 void drawObjects() {
   strength = 0;
   defense = 0;
@@ -115,12 +120,14 @@ void drawObjects() {
   drawStats();
 }
 
-//redraws the map to the buffer. This is done as one piece which is loaded with every map coordinate change to cut down on the logic that needs to be executed.
+//Redraws the map to the buffer. This is done as one piece which is loaded with every map coordinate
+//change to cut down on the logic that needs to be executed.
 void drawMap() {
   draw_sprite(buffer, fullMap, 0, 0);
   needUpdate = true;
 }
 
+//iIitializes a small amount of random enemies, pushing them to the myEnemies vector.
 void loadEnemies() {
   Enemy newEnemies[rand() % 3 + 1];
   myEnemies.clear();
@@ -128,13 +135,15 @@ void loadEnemies() {
     myEnemies.push_back(newEnemies[i]);
 }
 
+//Draws each Enemy object from the myEnemies vector onto the buffer.
 void drawEnemies() {
   for (int i = 0; i < myEnemies.size(); i++) {
     masked_blit(enemyPic, buffer, myEnemies[i].get_sx(), myEnemies[i].get_sy(), myEnemies[i].get_x(), myEnemies[i].get_y(), 34, 62);
   }
 }
 
-//loads the map data from the corresponding file according to mapx and mapy
+//Loads the map data from the corresponding text file in the Maps folder according to the player's mapx
+//and mapy locations
 void loadMap() {
   string fileName = "Maps/[";
   stringstream temp;
@@ -146,7 +155,7 @@ void loadMap() {
   ifstream inFile(fileName.c_str());
   string tempS;
 
-  //assigns correct map to the maptiles array  
+  //Reads the map text file's data into the maptiles 2D array, which will be used to draw the tiles.
   while(!inFile.eof()) {
     for (row = 0; row < 15; row++) {
       for (column = 0; column < 20; column++) {
@@ -157,7 +166,11 @@ void loadMap() {
     }
   }
   inFile.close();
-  //draws the correct map
+  
+  //Draws the correct map to a bitmap by looping through the maptiles array. Each element is a number which
+  //corresponds to a single 32x32 tile on the tile sheet "Sprites/tile.bmp". It simply multiplies the element
+  //by 32 to find the starting x value of which tile to draw, then uses 0 for the strating y and draws a 32x32
+  //square.
   fullMap = create_bitmap(640, 480);
   for (row = 0; row < 15; row++) {
     for (column = 0; column < 20; column++) {
@@ -165,12 +178,14 @@ void loadMap() {
         column*32, row*32, 32, 32);
     }
   }
+  
+  //Each time a new map is drawn, enemies are reloaded and the map and minimap are drawn.
   loadEnemies();
   drawMap();
   drawMiniMap();
 }
 
-//draws the character with the correct sprite to the buffer on top of the map
+//Draws the character with the correct sprite and enemies to the buffer on top of the map
 void drawChar() {
   drawMap();
   drawEnemies();
@@ -178,7 +193,7 @@ void drawChar() {
   needUpdate = true;
 }
 
-//paints the buffer to the screen and waits
+//Paints the buffer to the screen and waits
 void Draw() {
   acquire_screen();
   draw_sprite(screen, buffer, 0, 0);
@@ -189,7 +204,9 @@ void Draw() {
   rest(50);
 }
 
-//checks if player is standing on item square (depending on map coordinates) and adds it to the playersObjects vector for painting the itemsBox and adding up character's strength and defense
+//Checks if player is standing on item square (depending on map coordinates) and adds it to the playersObjects
+//vector for painting the itemsBox and adding up character's strength and defense, as long as the player does
+//not already have the item. It then redraws the player's items and pushes a notification.
 void checkObjects() {
   hasObject = false;
   if (currentObject == "SWORD") { // at square [3,4] in map [0,0]
@@ -325,14 +342,12 @@ void checkObjects() {
         drawNotifications(messageNew);
       }
     }
-  } /*else if (currentObject == "HELMET") { // at square [13, 12] in map [-1,-1]
-
-  } else if (currentObject == "HELMET") { // at square [13, 12] in map [-1,1]
-
-  }*/
+  }
 }
 
-bool checkEnemyCollision() { //add to y checks in checkMove if it doesn't work
+//Makes sure that the player will not walk into the bounds of an enemy character. Returns false if the player
+//is attempting to walk into an enemy, which stops the player from moving.
+bool checkEnemyCollision() {
   for (int i = 0; i < myEnemies.size(); i++) {
     if (x + cx < myEnemies[i].get_x() + 34 && x + cx + 34 > myEnemies[i].get_x()
     && y + cy < myEnemies[i].get_y() + 62 && y + cy + 62 > myEnemies[i].get_y()) {
@@ -343,6 +358,7 @@ bool checkEnemyCollision() { //add to y checks in checkMove if it doesn't work
   return false;
 }
 
+//Adds 10 health to the player. This is called every 10 seconds.
 void healPlayer() {
   if (health < 90)
     health += 10;
@@ -351,6 +367,7 @@ void healPlayer() {
   drawStats();
 }
 
+//Drops all of the player's items, putting their health back to 100 and moving them to the starting coords.
 void die() {
   playersObjects.clear();
   x = 320, y = 240, mapx = 0, mapy = 0, health = 100;
@@ -361,6 +378,7 @@ void die() {
   draw_sprite(screen, itemsBox, 640, 370);
 }
 
+//Increases the players level. Called when the player has enough XP to level up.
 void levelUp() {
   level++;
   stringstream temp;
@@ -369,6 +387,7 @@ void levelUp() {
   drawNotifications(messageNew);
 }
 
+//Adds XP to the player, checking if the player has enough to level up. XP is added when an enemy is killed.
 void addXP(int num) {
   XP += num;
   if (XP >= level * level * 10) {
@@ -378,6 +397,7 @@ void addXP(int num) {
   drawStats();
 }
 
+//Removes an enemy from the myEnemies vector, redrawing all other enemies and giving the player XP.
 void killEnemy(int num) {
   myEnemies.erase(myEnemies.begin() + num);
   drawEnemies();
@@ -386,19 +406,25 @@ void killEnemy(int num) {
   addXP(50);
 }
 
+//Prevents continuous attacking.
 void limitAttack() {
   isAttacking = false;
 }
 
-//checks collision data to see if player is facing toward and touching an enemy. If they are, then it deals damage based on their strength.
+//Uses cx and cy to check how far a player would move in a certain direction. Uses this data to see if an
+//enemy is at that coord. If there is, then it deals damage based on the player's strength. This method
+//also animates the player as if they were attacking by changing the sx value, which is the starting x of
+//the sprite to draw. This method also animates the enemy by calling the attackBack method in Enemy.cpp
 void checkAttack() {
-  if (sy == 62 || sy == 186) { //facing left/up
+  if (sy == 62 || sy == 186) { //Player is facing left/up
     cx = -10;
     cy = -10;
-  } else { //facing right/down
+  } else { //Player is facing right/down
     cx = 10;
     cy = 10;
-  } if (sx != 102)
+  }
+  //Animates the player to attack
+  if (sx != 102)
     sx = 102;
   else
     sx = 136;
@@ -407,15 +433,20 @@ void checkAttack() {
     myEnemies[enemyNum].health -= strength * .1 + (rand() % 10);
     if (myEnemies[enemyNum].health <= 0)
       killEnemy(enemyNum);
-    //damages the player while animating the enemy to attack
+    //Damages the player while animating the enemy to attack by calling the attackBack method in Enemy.cpp,
+    //which returns the amount of damage dealt to the enemy and orients the enemy toward the player.
     health -= myEnemies[enemyNum].attackBack(sy) - defense * .1;
+    //If the player has no health, kill them.
     if (health <= 0)
       die();
     drawStats();
   }
 }
 
-//handles character movement, checking for map edges to load new maps and object collision
+//Handles character movement, checking for map edges to load new maps and checks for enemy collision.
+//This method also animates the character if they can move, by adding the csx value (change in starting x
+//value for the source sprite) to sx (the starting x for the source sprite), which goes through the walk
+//cycle in the sprite sheet.
 void checkMove() {
   if (x + cx < 0 && mapx - 1 != -2) {
     mapx--;
@@ -457,7 +488,7 @@ void checkMove() {
   drawChar();
 }
 
-//creates a new character, saving basic info to file
+//Creates a new character, saving basic info to a new file with the name of the character.
 void newChar() {
   string charFile = "Characters/";
   charFile = charFile + charName + ".txt";
@@ -479,17 +510,17 @@ void newChar() {
   drawNotifications(messageNew);
 }
 
-//attempts to load character info from file. If it doesn't exist, creates new character
+//Attempts to load all character info from file. If it doesn't exist, creates a new character.
 void loadChar() {
   string charFile = "Characters/";
   charFile = charFile + charName + ".txt";
   ifstream inFile(charFile.c_str());
 
   if (inFile) {
-    //loads the char info 
+    //Loads the char info (location, health, combat values)
     inFile >> x >> y >> mapx >> mapy >> health >> strength >> defense >> XP >> level;
 
-    //loads the player's objects
+    //Loads the player's objects
     string oN;
     for (int i = 0; !(inFile.eof()); i++) {
       inFile >> oN;
@@ -547,7 +578,7 @@ void loadChar() {
     newChar();
 }
 
-//saves character info to file in "Characters" folder
+//Saves character info to it's corresponding file in the "Characters" folder
 void saveChar() {
   string charFile = "Characters/";
   charFile = charFile + charName + ".txt";
@@ -559,7 +590,7 @@ void saveChar() {
   outFile.close();
 }
 
-//dialog box to choose login or create character
+//Dialog box to choose login or create character (allegro)
 DIALOG chooseLoginDialog[] = {
   /* (proc) (x) (y) (w) (h) (fg) (bg) (key) (flags) (d1) (d2) (dp) (dp2) (dp3) */
   {d_shadow_box_proc, 120, 152, 460, 250, 0, 16777215, 0, 0, 0, 0, NULL, NULL, NULL},
@@ -571,7 +602,7 @@ DIALOG chooseLoginDialog[] = {
   {NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL}
 };
 
-//dialog box for create character
+//Dialog box for create character (allegro)
 DIALOG createCharDialog[] = {
   /* (proc) (x) (y) (w) (h) (fg) (bg) (key) (flags) (d1) (d2) (dp) (dp2) (dp3) */
   {d_shadow_box_proc, 120, 152, 460, 250, 0, 16777215, 0, 0, 0, 0, NULL, NULL, NULL},
@@ -583,7 +614,7 @@ DIALOG createCharDialog[] = {
   {NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL}
 };
 
-//dialog box for login
+//Dialog box for login (allegro)
 DIALOG loginCharDialog[] = {
   /* (proc) (x) (y) (w) (h) (fg) (bg) (key) (flags) (d1) (d2) (dp) (dp2) (dp3) */
   {d_shadow_box_proc, 120, 152, 460, 250, 0, 16777215, 0, 0, 0, 0, NULL, NULL, NULL},
@@ -595,20 +626,20 @@ DIALOG loginCharDialog[] = {
   {NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL}
 };
 
-//loads dialog boxes and grabs user input for login
+//Loads dialog boxes and grabs user input for login
 void login() {
   centre_dialog(chooseLoginDialog);
   centre_dialog(createCharDialog);
   centre_dialog(loginCharDialog);
   int ret = do_dialog(chooseLoginDialog, 4);
   if (ret == 4) {
-    int ret2 = do_dialog(loginCharDialog, 3);
+    int ret2 = do_dialog(loginCharDialog, 3); //Login
     if (ret2 == 4) //Play
       loadChar();
     else if (ret2 == 5) //Cancel (goes back to login alert)
       login();
   } else {
-    int ret2 = do_dialog(createCharDialog, 3);
+    int ret2 = do_dialog(createCharDialog, 3); //Create char
     if (ret2 == 4) //Play
       newChar();
     else if (ret2 == 5) //Cancel (goes back to login alert)
@@ -618,20 +649,20 @@ void login() {
 
 int main() {
 
-  //main window initialization
+  //Main window initialization
   allegro_init();
   set_color_depth(16);
   set_gfx_mode(GFX_AUTODETECT_WINDOWED, 840, 650, 0, 0); //640, 480
   install_keyboard();
   install_mouse();
 
-  //fonts
+  //Fonts
   Impact20 = load_font("Sprites/Impact20.pcx", NULL, NULL);
   Calibri20 = load_font("Sprites/Calibri20.pcx", NULL, NULL);
   Calibri16 = load_font("Sprites/Calibri16.pcx", NULL, NULL);
   font = load_font("Sprites/Calibri20.pcx", NULL, NULL);
   
-  //sprites
+  //Sprites
   buffer = create_bitmap(640, 480);
   character = load_bitmap("Sprites/character.bmp", NULL);
   map = load_bitmap("Sprites/tile.bmp", NULL);
@@ -642,19 +673,22 @@ int main() {
   notificationsBox = load_bitmap("Sprites/notificationsBox.bmp", NULL);
   enemyPic = load_bitmap("Sprites/enemyPic.bmp", NULL);
 
-  //prompts for login or create, grabbing username then painting GUI
+  //Prompts for login or create, grabbing username then painting GUI
   login();
   loadMap();
   drawObjects();
   drawChar();
 
-  //timers handle character animation
+  //Installing timers that handle character animation, attacking, and healing
   install_timer();
   LOCK_FUNCTION(checkMove);
   LOCK_FUNCTION(limitAttack);
   install_int_ex(healPlayer, SECS_TO_TIMER(10));
 
-  //main game loop. Runs until the user presses escape. Handles character walking, game logic and GUI repainting
+  //Main game loop. Runs until the user presses escape. Handles character walking, game logic and GUI
+  //repainting. When a walking button is pressed, the player changes their direction and will move
+  //the value of cx or cy if they can. The walking method checkMove is called 30 times a second. The
+  //player can attack 2 times a second.
   while (! key [KEY_ESC]) {
     remove_int(checkMove);
     if (key [KEY_W]) {
@@ -690,10 +724,10 @@ int main() {
       Draw();
   }
 
-  //when user exits game, their character is saved
+  //When user exits game, their character is saved.
   saveChar();
 
-  //memory deallocation
+  //Memory deallocation
   destroy_bitmap(character);
   destroy_bitmap(map);
   destroy_bitmap(fullMap);
