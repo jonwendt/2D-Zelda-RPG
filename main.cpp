@@ -694,21 +694,21 @@ int main() {
     if (key [KEY_W]) {
       sy = 186;
       cx = 0;
-      cy = -4;
+      cy = -7;
       install_int_ex(checkMove, BPS_TO_TIMER(30));
     } else if (key [KEY_A]) {
       sy = 62;
-      cx = -4;
+      cx = -7;
       cy = 0;
       install_int_ex(checkMove, BPS_TO_TIMER(30));
     } else if (key [KEY_S]) {
       sy = 0;
       cx = 0;
-      cy = 4;
+      cy = 7;
       install_int_ex(checkMove, BPS_TO_TIMER(30));
     } else if (key [KEY_D]) {
       sy = 124;
-      cx = 4;
+      cx = 7;
       cy = 0;
       install_int_ex(checkMove, BPS_TO_TIMER(30));
     } else if (key [KEY_SPACE] && !(isAttacking)) {
