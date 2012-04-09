@@ -1,0 +1,16 @@
+452
+182
+-1
+-1
+79
+75
+65
+150
+4
+Boots
+Sword
+Bow
+Helmet
+Shield
+Legs
+Chest
