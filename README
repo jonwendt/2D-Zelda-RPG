@@ -1,4 +1,4 @@
-This is a simple RPG game I created in C++ using the Allegro game library v.4.2 (allegro.cc) as a final project for my CSE 240 Intro to Programming Languages class at ASU. The game could use some tweaking, but I am proud of the overall outcome, this being my first real attempt at making a game.
+This is a simple RPG game I created in C++ using the Allegro game library v.4.2 (allegro.cc) as a final project for my CSE 240 Intro to Programming Languages class at ASU. The game could use some tweaking and there is some ugly code in there, but I am proud of the overall outcome, this being my first real attempt at making a game.
 
 
 Controls:
